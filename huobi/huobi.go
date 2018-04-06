@@ -38,6 +38,21 @@ type MarketDepth struct {
 	} `json:"tick"`
 }
 
+type Kline struct {
+	Ch string `json:"ch"`
+	Ts int64 `json:"ts"`
+	Tick struct{
+		Id int64 `json:"id"`
+		Amount float64 `json:"amount"`
+		Count float64 `json:"count"`
+		Open float64 `json:"open"`
+		Close float64 `json:"close"`
+		Low float64 `json:"low"`
+		High float64 `json:"high"`
+		Vol float64 `json:"vol"`
+	} `json:"tick"`
+}
+
 type Account struct {
 	ID     int64
 	Type   string
@@ -52,6 +67,7 @@ type Huobi struct {
 	market         *Market
 	depthListener  DepthlListener
 	detailListener DetailListener
+	klineListener  KlineListener
 }
 
 func (h *Huobi) OpenWebsocket() error {
@@ -234,6 +250,10 @@ func (h *Huobi) SetDepthlListener(listener DepthlListener) {
 	h.depthListener = listener
 }
 
+func (h *Huobi) SetKlineListener(listener KlineListener)  {
+	h.klineListener = listener
+}
+
 // Listener 订阅事件监听器
 type DetailListener = func(symbol string, detail *MarketTradeDetail)
 
@@ -276,6 +296,36 @@ func (h *Huobi) SubscribeDepth(symbols ...string) {
 			}
 
 		})
+	}
+}
+
+// Listener 订阅K线监听器
+type KlineListener = func(symbol string, period string, kl *Kline)
+
+func (h *Huobi) klineListenerHandle(topic string, j *huobiapi.JSON) {
+	js, _ := j.MarshalJSON()
+	var kl = Kline{}
+	if err := json.Unmarshal(js, &kl); err != nil {
+		log.Println(err.Error())
+	}
+	
+	ts := strings.Split(topic, ".")
+	if h.klineListener != nil {
+		h.klineListener(ts[1], ts[3], &kl)
+	}
+}
+
+func (h *Huobi) SubscribeKline(symbols ...string) {
+	for _, symbol := range symbols {
+		h.market.Subscribe("market." + symbol + ".kline.1min", h.klineListenerHandle)
+		h.market.Subscribe("market." + symbol + ".kline.5min", h.klineListenerHandle)
+		h.market.Subscribe("market." + symbol + ".kline.15min", h.klineListenerHandle)
+		h.market.Subscribe("market." + symbol + ".kline.30min", h.klineListenerHandle)
+		h.market.Subscribe("market." + symbol + ".kline.60min", h.klineListenerHandle)
+		h.market.Subscribe("market." + symbol + ".kline.1day", h.klineListenerHandle)
+		h.market.Subscribe("market." + symbol + ".kline.1mon", h.klineListenerHandle)
+		h.market.Subscribe("market." + symbol + ".kline.1week", h.klineListenerHandle)
+		h.market.Subscribe("market." + symbol + ".kline.1year", h.klineListenerHandle)
 	}
 }
 
