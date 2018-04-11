@@ -204,6 +204,7 @@ func (h *Huobi) GetOrderInfo(params *proto.OrderInfoParams) (*proto.Order, error
 	ret.FieldAmount, _ = strconv.ParseFloat(orderReturn.Data.FieldAmount, 64)
 	ret.Type = orderReturn.Data.Type
 	ret.Amount, _ = strconv.ParseFloat(orderReturn.Data.Amount, 64)
+	ret.FieldFees, _ = strconv.ParseFloat(orderReturn.Data.FieldFees, 64)
 
 	return &ret, nil
 

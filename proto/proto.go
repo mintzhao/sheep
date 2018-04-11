@@ -57,6 +57,7 @@ type Order struct {
 	FieldAmount float64 `json:"field-amount"`
 	Price       float64 `json:"price"`
 	Type        string  `json:"type"`
+	FieldFees   float64 `json:"field_fees,omitempty"`
 }
 
 type OrdersParams struct {
