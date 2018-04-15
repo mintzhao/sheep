@@ -316,17 +316,9 @@ func (h *Huobi) klineListenerHandle(topic string, j *huobiapi.JSON) {
 	}
 }
 
-func (h *Huobi) SubscribeKline(symbols ...string) {
+func (h *Huobi) SubscribeKline(period string, symbols ...string) {
 	for _, symbol := range symbols {
-		h.market.Subscribe("market." + symbol + ".kline.1min", h.klineListenerHandle)
-		h.market.Subscribe("market." + symbol + ".kline.5min", h.klineListenerHandle)
-		h.market.Subscribe("market." + symbol + ".kline.15min", h.klineListenerHandle)
-		h.market.Subscribe("market." + symbol + ".kline.30min", h.klineListenerHandle)
-		h.market.Subscribe("market." + symbol + ".kline.60min", h.klineListenerHandle)
-		h.market.Subscribe("market." + symbol + ".kline.1day", h.klineListenerHandle)
-		h.market.Subscribe("market." + symbol + ".kline.1mon", h.klineListenerHandle)
-		h.market.Subscribe("market." + symbol + ".kline.1week", h.klineListenerHandle)
-		h.market.Subscribe("market." + symbol + ".kline.1year", h.klineListenerHandle)
+		h.market.Subscribe("market." + symbol + ".kline." + period, h.klineListenerHandle)
 	}
 }
 
